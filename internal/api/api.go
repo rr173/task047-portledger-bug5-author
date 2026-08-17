@@ -4,6 +4,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -68,6 +69,11 @@ func handleSubmitScan(w http.ResponseWriter, req *http.Request, r *registry.Regi
 	var body scanRequest
 	dec := json.NewDecoder(req.Body)
 	if err := dec.Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	var extra any
+	if err := dec.Decode(&extra); err != io.EOF {
 		writeError(w, http.StatusBadRequest, "invalid JSON body")
 		return
 	}
